@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic-settings
+pyjwt
+httpx
+google-api-python-client
+google-auth
+google-auth-httplib2
+PyMuPDF
+python-docx
+python-pptx
+langchain
+langchain-text-splitters
+openai
+pinecone
+anthropic

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Background -->
+  <rect width="64" height="64" rx="14" fill="#16161f"/>
+  <!-- Folder shape -->
+  <path d="M10 22a4 4 0 014-4h10l4 4h16a4 4 0 014 4v14a4 4 0 01-4 4H14a4 4 0 01-4-4V22z" fill="#7c3aed" opacity="0.25"/>
+  <path d="M10 26a4 4 0 014-4h26a4 4 0 014 4v14a4 4 0 01-4 4H14a4 4 0 01-4-4V26z" fill="#7c3aed" opacity="0.9"/>
+  <!-- Chat lines -->
+  <rect x="17" y="31" width="14" height="2.5" rx="1.25" fill="white" opacity="0.9"/>
+  <rect x="17" y="36" width="9" height="2.5" rx="1.25" fill="white" opacity="0.6"/>
+</svg>
