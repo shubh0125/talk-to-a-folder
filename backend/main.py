@@ -197,7 +197,14 @@ async def load_folder(
             logger.exception("Unexpected error during folder load for user %s", google_sub)
             yield _sse("An unexpected error occurred. Please try again.", event="error")
 
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 def _sse(data: str, event: str = "progress") -> str:
