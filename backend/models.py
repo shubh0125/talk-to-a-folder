@@ -63,6 +63,7 @@ class ChatRequest(BaseModel):
 
 
 class Citation(BaseModel):
+    index: int
     filename: str
     page: Optional[int]
     file_id: str

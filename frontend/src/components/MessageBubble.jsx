@@ -2,8 +2,31 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import CitationPill from './CitationPill'
 
+// Replaces [1], [2] etc. in text nodes with styled superscript badges
+function withCitationBadges(children) {
+  return Array.isArray(children)
+    ? children.map((child, i) => typeof child === 'string' ? renderBadges(child, i) : child)
+    : typeof children === 'string' ? renderBadges(children, 0) : children
+}
+
+function renderBadges(text, keyPrefix) {
+  const parts = text.split(/(\[\d+\])/)
+  if (parts.length === 1) return text
+  return parts.map((part, i) => {
+    const m = part.match(/^\[(\d+)\]$/)
+    if (m) {
+      return (
+        <sup key={`${keyPrefix}-${i}`} className="inline-flex items-center justify-center min-w-[15px] h-[15px] text-[10px] bg-[#7c3aed]/25 text-[#a78bfa] rounded-full font-semibold px-1 mx-0.5 leading-none">
+          {m[1]}
+        </sup>
+      )
+    }
+    return part
+  })
+}
+
 const markdownComponents = {
-  p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+  p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{withCitationBadges(children)}</p>,
 
   h1: ({ children }) => <h1 className="text-lg font-bold text-white mb-2 mt-3 first:mt-0">{children}</h1>,
   h2: ({ children }) => <h2 className="text-base font-bold text-white mb-2 mt-3 first:mt-0">{children}</h2>,
@@ -11,7 +34,7 @@ const markdownComponents = {
 
   ul: ({ children }) => <ul className="list-disc list-outside pl-4 mb-2 space-y-1">{children}</ul>,
   ol: ({ children }) => <ol className="list-decimal list-outside pl-4 mb-2 space-y-1">{children}</ol>,
-  li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+  li: ({ children }) => <li className="leading-relaxed">{withCitationBadges(children)}</li>,
 
   strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
   em: ({ children }) => <em className="italic text-[#c8c8e0]">{children}</em>,
@@ -85,7 +108,7 @@ export default function MessageBubble({ role, content, citations }) {
         {!isUser && citations && citations.length > 0 && (
           <div className="flex flex-wrap mt-2 max-w-full">
             {citations.map((c, i) => (
-              <CitationPill key={i} filename={c.filename} page={c.page} file_id={c.file_id} />
+              <CitationPill key={i} index={c.index} filename={c.filename} page={c.page} file_id={c.file_id} />
             ))}
           </div>
         )}

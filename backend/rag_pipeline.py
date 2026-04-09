@@ -7,21 +7,30 @@ from config import settings
 client = Anthropic(api_key=settings.anthropic_api_key)
 
 
-def build_context(chunks: list[dict]) -> str:
+def build_context(chunks: list[dict]) -> tuple[str, dict]:
+    """Build numbered context string and return source map: (filename, page) -> index."""
+    source_map = {}
+    for chunk in chunks:
+        key = (chunk["filename"], chunk.get("page") or 0)
+        if key not in source_map:
+            source_map[key] = len(source_map) + 1
+
     context_parts = []
     for chunk in chunks:
+        key = (chunk["filename"], chunk.get("page") or 0)
+        idx = source_map[key]
         page_info = f", page {chunk['page']}" if chunk.get("page") else ""
-        header = f"[{chunk['filename']}{page_info}]"
+        header = f"[{idx}] {chunk['filename']}{page_info}"
         context_parts.append(f"{header}:\n{chunk['text']}")
-    return "\n\n---\n\n".join(context_parts)
+
+    return "\n\n---\n\n".join(context_parts), source_map
 
 
-def extract_citations(chunks: list[dict]) -> list[Citation]:
+def extract_citations(chunks: list[dict], source_map: dict) -> list[Citation]:
     if not chunks:
         return []
 
-    # Only cite chunks within 0.15 of the top score — filters weakly related
-    # documents while always guaranteeing at least one citation
+    # Only cite chunks within 0.15 of the top score
     top_score = max(c.get("score", 0) for c in chunks)
     threshold = top_score - 0.15
 
@@ -30,14 +39,17 @@ def extract_citations(chunks: list[dict]) -> list[Citation]:
     for chunk in chunks:
         if chunk.get("score", 0) < threshold:
             continue
-        key = (chunk["filename"], chunk.get("page"))
+        key = (chunk["filename"], chunk.get("page") or 0)
         if key not in seen:
             seen.add(key)
             citations.append(Citation(
+                index=source_map.get(key, 0),
                 filename=chunk["filename"],
                 page=chunk.get("page"),
                 file_id=chunk["file_id"]
             ))
+
+    citations.sort(key=lambda c: c.index)
     return citations
 
 
@@ -54,15 +66,16 @@ async def run_rag_query(question: str, google_sub: str) -> dict:
             "citations": []
         }
 
-    # Step 3: Build context
-    context = build_context(chunks)
+    # Step 3: Build numbered context
+    context, source_map = build_context(chunks)
 
     # Step 4: Call Claude
     system_prompt = """You are a document assistant. Your job is to answer questions based strictly on the provided context from the user's files.
 
 Rules:
 - Only use information explicitly present in the context
-- Do NOT include filename citations or source references inside your answer text — sources are shown separately to the user
+- After each sentence or fact that comes from a source, add the source number in brackets like [1] or [2]
+- Source numbers correspond to the [N] prefixes shown in the context headers
 - If the answer is not in the context, say: "I couldn't find information about that in the loaded files."
 - Do not hallucinate or infer beyond what is written
 
@@ -88,7 +101,7 @@ Question: {question}"""
     )
 
     answer = response.content[0].text
-    citations = extract_citations(chunks)
+    citations = extract_citations(chunks, source_map)
 
     return {
         "answer": answer,
