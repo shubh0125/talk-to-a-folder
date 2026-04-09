@@ -16,10 +16,14 @@ def build_context(chunks: list[dict]) -> str:
     return "\n\n---\n\n".join(context_parts)
 
 
+CITATION_SCORE_THRESHOLD = 0.75
+
 def extract_citations(chunks: list[dict]) -> list[Citation]:
     seen = set()
     citations = []
     for chunk in chunks:
+        if chunk.get("score", 0) < CITATION_SCORE_THRESHOLD:
+            continue
         key = (chunk["filename"], chunk.get("page"))
         if key not in seen:
             seen.add(key)
