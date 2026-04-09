@@ -45,7 +45,7 @@ export default function FolderLoader({ onFolderLoaded, sseMessages, sseLoading, 
 
         {error && <p className="mt-2 text-red-400 text-xs">{error}</p>}
 
-        {sseMessages.length > 0 && (
+        {(sseLoading || sseMessages.length > 0) && (
           <div className="mt-5">
             <ProgressStream messages={sseMessages} loading={sseLoading} />
           </div>

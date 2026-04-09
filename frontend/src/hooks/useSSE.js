@@ -20,5 +20,9 @@ export function useSSE() {
     )
   }
 
-  return { messages, loading, startLoad }
+  function clearMessages() {
+    setMessages([])
+  }
+
+  return { messages, loading, startLoad, clearMessages }
 }

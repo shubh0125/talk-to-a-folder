@@ -12,7 +12,7 @@ const STORAGE_CHAT_KEY = 'chat_messages'
 
 export default function App() {
   const { user, loading, handleGoogleSuccess, logout } = useAuth()
-  const { messages: progressMessages, loading: sseLoading, startLoad } = useSSE()
+  const { messages: progressMessages, loading: sseLoading, startLoad, clearMessages } = useSSE()
 
   const [folderLoaded, setFolderLoaded] = useState(false)
   const [statusChecking, setStatusChecking] = useState(true)
@@ -96,6 +96,7 @@ export default function App() {
     setFolderUrl('')
     setChatMessages([])
     setShowLoader(true)
+    clearMessages()
     localStorage.removeItem(STORAGE_CHAT_KEY)
   }
 
