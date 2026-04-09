@@ -44,7 +44,7 @@ export default function AuthScreen({ onSuccess }) {
         <div className="mt-10 grid grid-cols-1 gap-3 text-left">
           {[
             { icon: '📁', text: 'Connect any Google Drive folder' },
-            { icon: '🔍', text: 'Smart semantic search across all docs' },
+            { icon: '🔍', text: 'Smart search across all docs' },
             { icon: '💬', text: 'Chat with AI — answers cite sources' },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-3 bg-[#1f1f2e] rounded-xl px-4 py-3 border border-[#2e2e45]">
