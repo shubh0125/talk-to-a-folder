@@ -16,13 +16,19 @@ def build_context(chunks: list[dict]) -> str:
     return "\n\n---\n\n".join(context_parts)
 
 
-CITATION_SCORE_THRESHOLD = 0.75
-
 def extract_citations(chunks: list[dict]) -> list[Citation]:
+    if not chunks:
+        return []
+
+    # Only cite chunks within 0.15 of the top score — filters weakly related
+    # documents while always guaranteeing at least one citation
+    top_score = max(c.get("score", 0) for c in chunks)
+    threshold = top_score - 0.15
+
     seen = set()
     citations = []
     for chunk in chunks:
-        if chunk.get("score", 0) < CITATION_SCORE_THRESHOLD:
+        if chunk.get("score", 0) < threshold:
             continue
         key = (chunk["filename"], chunk.get("page"))
         if key not in seen:

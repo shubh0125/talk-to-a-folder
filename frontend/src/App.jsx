@@ -224,6 +224,10 @@ export default function App() {
               messages={chatMessages}
               onSend={handleSendMessage}
               loading={chatLoading}
+              onNewChat={() => {
+                setChatMessages([])
+                localStorage.removeItem(STORAGE_CHAT_KEY)
+              }}
             />
           </main>
         </div>

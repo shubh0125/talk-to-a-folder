@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import logging.config
@@ -128,10 +129,12 @@ async def load_folder(
     async def event_stream():
         try:
             yield _sse("step:connecting")
+            await asyncio.sleep(0)
             folder_id = extract_folder_id(body.folder_url)
             service = get_drive_service(access_token)
 
             yield _sse("step:reading")
+            await asyncio.sleep(0)
             files = list_files_in_folder(service, folder_id)
 
             if not files:
@@ -139,11 +142,13 @@ async def load_folder(
                 return
 
             yield _sse(f"step:extracting:{len(files)}")
+            await asyncio.sleep(0)
             delete_user_namespace(google_sub)
 
             all_chunks = []
             for i, file in enumerate(files):
                 yield _sse(f"step:extracting:{len(files)}:{i + 1}")
+                await asyncio.sleep(0)
                 try:
                     content = download_file(service, file)
                     text = extract_text(file, content)
@@ -165,9 +170,11 @@ async def load_folder(
                 return
 
             yield _sse("step:analyzing")
+            await asyncio.sleep(0)
             all_chunks = embed_chunks(all_chunks)
 
             yield _sse("step:saving")
+            await asyncio.sleep(0)
             upsert_chunks(all_chunks, google_sub)
 
             # Persist folder URL and email to Pinecone so user is auto-restored
